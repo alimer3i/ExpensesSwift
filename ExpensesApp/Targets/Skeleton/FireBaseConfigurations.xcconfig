@@ -1,0 +1,42 @@
+//
+//  FireBaseConfigurations.xcconfig
+//  rbtProduct
+//
+//  Created by Ali Merhie on 3/10/24.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+GoogleInfoPlist=GoogleService-Info.plist
+
+DEBUG_INFO_PLIST=${PROJECT_DIR}/ExpensesApp/Targets/Skeleton/FireBaseServices/Debug/${GoogleInfoPlist}
+RELEASE_INFO_PLIST=${PROJECT_DIR}/ExpensesApp/Targets/Skeleton/FireBaseServices/Release/${GoogleInfoPlist}
+
+echo "Checking ${INFO_PLIST} in ${DEBUG_INFO_PLIST}"
+if [ ! -f $DEBUG_INFO_PLIST ] ; then
+    echo "Debug GoogleService-Info.plist not found."
+    exit 1
+fi
+
+echo "Checking ${INFO_PLIST} in ${RELEASE_INFO_PLIST}"
+if [ ! -f $RELEASE_INFO_PLIST ] ; then
+    echo "Release GoogleService-Info.plist not found."
+    exit 1
+fi
+
+PLIST_DESTINATION=${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app
+echo "Copying ${INFO_PLIST} to final destination: ${PLIST_DESTINATION}"
+
+if [ "${CONFIGURATION}" == "Release" ] ; then
+    echo "Copied ${RELEASE_INFO_PLIST}."
+    cp "${RELEASE_INFO_PLIST}" "${PLIST_DESTINATION}"
+${PODS_ROOT}/FirebaseCrashlytics/upload-symbols -gsp ${RELEASE_INFO_PLIST} -p ios ${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}
+${PODS_ROOT}/FirebaseCrashlytics/run
+else
+    echo "Copied ${DEBUG_INFO_PLIST}."
+    cp "${DEBUG_INFO_PLIST}" "${PLIST_DESTINATION}"
+${PODS_ROOT}/FirebaseCrashlytics/upload-symbols -gsp ${DEBUG_INFO_PLIST} -p ios ${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}
+${PODS_ROOT}/FirebaseCrashlytics/run
+fi
+
